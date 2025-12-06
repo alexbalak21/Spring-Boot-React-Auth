@@ -30,7 +30,7 @@ export default function App() {
       <div>
         <h1>React App</h1>
 
-        <p>Server response: {response}</p>
+        <p>{response}</p>
 
         <div>
           <input type="text" value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Enter a message" />
