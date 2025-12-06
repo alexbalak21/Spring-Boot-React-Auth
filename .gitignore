@@ -4,6 +4,8 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+### React build ###
+/src/main/resources/static/assets/*
 ### STS ###
 .apt_generated
 .classpath
