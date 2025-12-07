@@ -13,14 +13,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RestController
 @RequestMapping("/api")
 public class ApiController {
+    private String message = "Hello from Spring Boot!";
 
     @GetMapping("/message")
     public String hello() {
-        return "\"message\": \"Hello from Spring Boot! & Welcome\"";
+        return "\"message\": \"" + message + "\"";
     }
 
     @PostMapping("/message")
     public String postMessage(@RequestBody MessageRequest request) {
-        return request.getMessage();
+        this.message = request.getMessage();
+        return message;
     }
 }
