@@ -1,0 +1,2 @@
+GET http://localhost:8100/api/message
+Accept: application/json

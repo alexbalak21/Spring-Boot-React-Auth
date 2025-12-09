@@ -1,6 +1,7 @@
 package app.config;
 
 import app.security.JwtAuthenticationFilter;
+import app.security.OriginValidationFilter;
 import app.service.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,17 +25,20 @@ import org.springframework.web.cors.CorsConfigurationSource;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final OriginValidationFilter originValidationFilter;
     private final CorsConfigurationSource corsConfigurationSource;
     private final CookieCsrfTokenRepository csrfTokenRepository;
     private final CsrfTokenRequestAttributeHandler csrfTokenRequestHandler;
     private final RequestMatcher csrfIgnoreMatcher;
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
+                          OriginValidationFilter originValidationFilter,
                           CorsConfigurationSource corsConfigurationSource,
                           CookieCsrfTokenRepository csrfTokenRepository,
                           CsrfTokenRequestAttributeHandler csrfTokenRequestHandler,
                           RequestMatcher csrfIgnoreMatcher) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.originValidationFilter = originValidationFilter;
         this.corsConfigurationSource = corsConfigurationSource;
         this.csrfTokenRepository = csrfTokenRepository;
         this.csrfTokenRequestHandler = csrfTokenRequestHandler;
@@ -48,8 +52,8 @@ public class SecurityConfig {
         "/favicon.ico", "/error",
         "/api/auth/register",
         "/api/auth/login",
-        "/api/csrf",
-        "/about", "/demo", "/login", "/register", "/api/demo", "/user"
+        "/api/csrf","/api/message",
+        "/about", "/login", "/register", "/user"
     };
 
     @Bean
@@ -71,6 +75,7 @@ public class SecurityConfig {
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .authenticationProvider(authProvider)
+            .addFilterBefore(originValidationFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
