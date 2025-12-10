@@ -11,7 +11,7 @@ interface RegisterFormData {
 }
 
 export default function Register() {
-  const csrfReady = useCsrf();
+ useCsrf();
 
   const [formData, setFormData] = useState<RegisterFormData>({
     name: "",
@@ -120,8 +120,8 @@ export default function Register() {
 
           <button
             type="submit"
-            className={`${styles.button} ${isLoading ? styles.buttonLoading : ""}`}
-            disabled={isLoading || !csrfReady}
+            className={`login-button ${isLoading ? 'login-button-disabled' : ''}`}
+            disabled={isLoading}
           >
             {isLoading ? 'Registering...' : 'Register'}
           </button>

@@ -11,7 +11,7 @@ interface LoginFormData {
 }
 
 export default function Login() {
-  const csrfReady = useCsrf();
+  useCsrf();
   const { setAccessToken } = useAuthToken();
 
   const [formData, setFormData] = useState<LoginFormData>({
