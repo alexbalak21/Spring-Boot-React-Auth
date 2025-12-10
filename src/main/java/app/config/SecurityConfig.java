@@ -50,8 +50,6 @@ public class SecurityConfig {
         "/*.js", "/*.css", "/*.json", "/*.png", "/*.jpg",
         "/*.jpeg", "/*.gif", "/*.svg", "/*.ico",
         "/favicon.ico", "/error",
-        "/api/auth/register",
-        "/api/auth/login",
         "/api/csrf","/api/message",
         "/about", "/login", "/register", "/user"
     };

@@ -22,6 +22,8 @@ public class OriginValidationFilter extends OncePerRequestFilter {
 
     // Paths that require origin validation (stricter enforcement)
     private static final String[] PROTECTED_PATHS = {
+        "/api/auth/login",
+        "/api/auth/register",
         "/api/user",
         "/api/auth/logout",
         "/api/demo"
