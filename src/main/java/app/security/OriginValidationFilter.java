@@ -20,10 +20,14 @@ public class OriginValidationFilter extends OncePerRequestFilter {
     @Value("${app.security.allowed-origin}")
     private String allowedOrigin;
 
-    // Paths that require origin validation (stricter enforcement)
-    private static final String[] PROTECTED_PATHS = {
+    // Paths that ALWAYS require origin validation (must match allowed origin)
+    private static final String[] STRICT_PROTECTED_PATHS = {
         "/api/auth/login",
-        "/api/auth/register",
+        "/api/auth/register"
+    };
+
+    // Paths that only validate origin if it's present
+    private static final String[] PROTECTED_PATHS = {
         "/api/user",
         "/api/auth/logout",
         "/api/demo"
@@ -37,7 +41,16 @@ public class OriginValidationFilter extends OncePerRequestFilter {
         String origin = request.getHeader("Origin");
         String requestPath = request.getRequestURI();
         
-        // Check if this request path needs origin validation
+        // Check if this is a STRICT protected path (MUST have origin that matches)
+        boolean isStrictProtectedPath = false;
+        for (String path : STRICT_PROTECTED_PATHS) {
+            if (requestPath.startsWith(path)) {
+                isStrictProtectedPath = true;
+                break;
+            }
+        }
+        
+        // Check if this is a regular protected path (validate origin if present)
         boolean isProtectedPath = false;
         for (String path : PROTECTED_PATHS) {
             if (requestPath.startsWith(path)) {
@@ -46,10 +59,26 @@ public class OriginValidationFilter extends OncePerRequestFilter {
             }
         }
         
-        // If protected path and origin is present, validate it
+        // STRICT: /api/auth/login and /api/auth/register MUST have valid origin
+        if (isStrictProtectedPath) {
+            if (origin == null) {
+                logger.warn("Rejected request to " + requestPath + " - no Origin header present");
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                response.getWriter().write("Origin header is required");
+                return;
+            }
+            if (!origin.equals(allowedOrigin)) {
+                logger.warn("Rejected request from unauthorized origin: " + origin + " for path: " + requestPath + ". Allowed origin: " + allowedOrigin);
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                response.getWriter().write("Origin not allowed");
+                return;
+            }
+        }
+        
+        // LENIENT: Other protected paths only validate if origin is present
         if (isProtectedPath && origin != null) {
             if (!origin.equals(allowedOrigin)) {
-                logger.warn("Rejected request from unauthorized origin: " + origin + " for path: " + requestPath);
+                logger.warn("Rejected request from unauthorized origin: " + origin + " for path: " + requestPath + ". Allowed origin: " + allowedOrigin);
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                 response.getWriter().write("Origin not allowed");
                 return;

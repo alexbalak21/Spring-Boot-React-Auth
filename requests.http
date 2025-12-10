@@ -1,0 +1,26 @@
+###DEMO###
+GET http://localhost:8100/api/demo
+Accept: application/json
+
+
+###GET CSRF TOKEN###
+GET http://localhost:8100/api/csrf
+Accept: application/json
+
+###REGISTER###
+POST http://localhost:8100/api/auth/register
+Content-Type: application/json
+{
+    "name": "Alex",
+    "email": "alex@mail.com",
+    "password": "alex@mail.com"
+}
+   
+###LOGIN###
+POST http://localhost:8100/api/auth/login
+Content-Type: application/json
+
+{
+    "email": "alex@mail.com",
+    "password": "alex@mail.com"
+}
