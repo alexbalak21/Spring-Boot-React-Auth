@@ -75,4 +75,13 @@ public class AuthController {
             "message", "User registered successfully"
         ));
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout() {
+        // JWT is stateless, so logout is handled client-side by removing the token
+        // Server-side can optionally invalidate token in a blacklist if needed
+        return ResponseEntity.ok(Map.of(
+            "message", "Logged out successfully"
+        ));
+    }
 }

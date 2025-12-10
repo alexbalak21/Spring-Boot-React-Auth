@@ -4,6 +4,16 @@
 @token = ""
 @refreshToken = ""
 
+
+
+
+###GET CSRF TOKEN###
+# @name csrf
+GET http://localhost:8100/api/csrf
+Accept: application/json
+
+@csrfToken = {{csrf.response.body.csrfToken}}
+
 ### REGISTER
 POST {{baseUrl}}/auth/register
 Content-Type: application/json
@@ -26,45 +36,3 @@ Content-Type: application/json
 
 @token = {{login.response.body.token}}
 @refreshToken = {{login.response.body.refreshToken}}
-
-###GET USER DETAILS
-GET {{baseUrl}}/user
-Content-Type: application/json
-Authorization: Bearer {{token}}
-
-###LOGOUT
-POST {{baseUrl}}/auth/logout
-Content-Type: application/json
-Authorization: Bearer {{token}}
-
-###REFRESH TOKEN
-POST {{baseUrl}}/auth/refresh-token
-Content-Type: application/json
-
-{
-    "refreshToken": "{{refreshToken}}"
-}
-
-### Create Issue (using the token from login)
-POST {{baseUrl}}/issues
-Content-Type: application/json
-Authorization: Bearer {{token}}
-
-{
-  "title": "Bug in login",
-  "description": "dGVzdA==",
-  "priority": "HIGH",
-  "type": "BUG",
-  "assigneeId": 2,
-  "teamId": 1
-}
-
-### Create Minimal Issue 
-POST {{baseUrl}}/issues
-Content-Type: application/json
-Authorization: Bearer {{token}}
-
-{
-  "title": "Bug in login",
-  "description": "hello world"
-}

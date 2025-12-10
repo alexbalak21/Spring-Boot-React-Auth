@@ -111,7 +111,7 @@ export default function Login() {
           <button
             type="submit"
             className={`login-button ${isLoading ? 'login-button-disabled' : ''}`}
-            disabled={isLoading || !csrfReady}
+            disabled={isLoading}
           >
             {isLoading ? 'Logging in...' : 'Login'}
           </button>
