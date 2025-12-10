@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthorizedApi } from "../../hooks/useAuthorizedApi";
-import "./css/Post.css";
 
 const POST_URL = "/posts"
 
@@ -44,70 +43,69 @@ export default function CreatePost() {
   };
 
   return (
-    <div className="l-container u-py-8">
-      <div className="c-auth__card">
-        <h2 className="c-auth__title">Create New Post</h2>
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto">
+        <div className="bg-white py-8 px-6 shadow rounded-lg sm:px-10">
+          <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">Create New Post</h2>
 
-        {error && (
-          <div className="c-alert c-alert--error u-mb-4">
-            {error}
-          </div>
-        )}
+          {error && (
+            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
+              <p>{error}</p>
+            </div>
+          )}
 
-        <form onSubmit={handleSubmit} className="c-auth__form">
-          <div className="c-form-group">
-            <label htmlFor="title" className="c-form__label">
-              Title
-            </label>
-            <input
-              type="text"
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="c-form__input"
-              disabled={isSubmitting}
-              placeholder="Enter post title"
-              maxLength={100}
-              required
-            />
-          </div>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+                Title
+              </label>
+              <input
+                type="text"
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+                disabled={isSubmitting}
+                placeholder="Enter post title"
+                maxLength={100}
+                required
+              />
+            </div>
 
-          <div className="c-form-group">
-            <label htmlFor="body" className="c-form__label">
-              Content
-            </label>
-            <textarea
-              id="body"
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              className="c-form__input c-form__input--textarea"
-              disabled={isSubmitting}
-              placeholder="Write your post content here..."
-              rows={6}
-              required
-            />
-          </div>
+            <div>
+              <label htmlFor="body" className="block text-sm font-medium text-gray-700 mb-1">
+                Content
+              </label>
+              <textarea
+                id="body"
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border h-48"
+                disabled={isSubmitting}
+                placeholder="Write your post content here..."
+                required
+              />
+            </div>
 
-          <div className="c-form__actions">
-            <button
-              type="button"
-              className="c-button c-button--secondary u-mr-3"
-              onClick={() => navigate(-1)}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className={`c-button c-button--primary ${
-                isSubmitting ? 'c-button--disabled' : ''
-              }`}
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Publishing...' : 'Publish Post'}
-            </button>
-          </div>
-        </form>
+            <div className="flex justify-end space-x-3 pt-4">
+              <button
+                type="button"
+                className="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                onClick={() => navigate(-1)}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Creating...' : 'Create Post'}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
