@@ -121,7 +121,7 @@ export default function Register() {
           <button
             type="submit"
             className={`login-button ${isLoading ? 'login-button-disabled' : ''}`}
-            disabled={isLoading || !csrfReady}
+            disabled={isLoading}
           >
             {isLoading ? 'Registering...' : 'Register'}
           </button>

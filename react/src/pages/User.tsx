@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useCsrf } from "../hooks/useCsrf";
 import { useAuthorizedApi } from "../hooks/useAuthorizedApi";
+import { useLogout } from "../hooks/useLogout";
 
 const USER_URL = "/user"; // baseURL is already set in useAuthorizedApi
 
@@ -22,6 +23,8 @@ export default function User() {
   const [user, setUser] = useState<UserInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const { logout, loading: logoutLoading } = useLogout();
 
   useEffect(() => {
     if (!csrfReady) {
@@ -65,6 +68,17 @@ export default function User() {
         {error && <div className="alert-error">{error}</div>}
         {user && (
           <div className="login-form">
+            <div style={{ marginBottom: 12 }}>
+              <button
+                className="btn"
+                onClick={() => {
+                  if (confirm("Log out now?")) logout();
+                }}
+                disabled={logoutLoading}
+              >
+                {logoutLoading ? "Logging out..." : "Logout"}
+              </button>
+            </div>
             <div className="form-group">
               <strong>ID:</strong> {user.id}
             </div>
