@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuthorizedApi } from "../hooks/useAuthorizedApi";
+import { useAuthorizedApi } from "../../hooks/useAuthorizedApi";
+import "./css/Post.css";
 
 const POST_URL = "/posts"
 
@@ -43,15 +44,19 @@ export default function CreatePost() {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <h2 className="login-title">Create New Post</h2>
+    <div className="l-container u-py-8">
+      <div className="c-auth__card">
+        <h2 className="c-auth__title">Create New Post</h2>
 
-        {error && <div className="alert-error">{error}</div>}
+        {error && (
+          <div className="c-alert c-alert--error u-mb-4">
+            {error}
+          </div>
+        )}
 
-        <form onSubmit={handleSubmit} className="login-form">
-          <div className="form-group">
-            <label htmlFor="title" className="form-label">
+        <form onSubmit={handleSubmit} className="c-auth__form">
+          <div className="c-form-group">
+            <label htmlFor="title" className="c-form__label">
               Title
             </label>
             <input
@@ -59,35 +64,49 @@ export default function CreatePost() {
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="form-input"
+              className="c-form__input"
               disabled={isSubmitting}
               placeholder="Enter post title"
               maxLength={100}
+              required
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="body" className="form-label">
+          <div className="c-form-group">
+            <label htmlFor="body" className="c-form__label">
               Content
             </label>
             <textarea
               id="body"
               value={body}
               onChange={(e) => setBody(e.target.value)}
-              className="form-input"
+              className="c-form__input c-form__input--textarea"
               disabled={isSubmitting}
               placeholder="Write your post content here..."
               rows={6}
+              required
             />
           </div>
 
-          <button
-            type="submit"
-            className={`login-button ${isSubmitting ? 'login-button-disabled' : ''}`}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Publishing...' : 'Publish Post'}
-          </button>
+          <div className="c-form__actions">
+            <button
+              type="button"
+              className="c-button c-button--secondary u-mr-3"
+              onClick={() => navigate(-1)}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className={`c-button c-button--primary ${
+                isSubmitting ? 'c-button--disabled' : ''
+              }`}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Publishing...' : 'Publish Post'}
+            </button>
+          </div>
         </form>
       </div>
     </div>

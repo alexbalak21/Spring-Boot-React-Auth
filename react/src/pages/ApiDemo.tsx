@@ -39,29 +39,33 @@ export default function ApiDemo() {
   };
 
   return (
-    <div className="app-container">
-      <h1>API Demo</h1>
-      <div className="api-demo-container">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Type a message..."
-          className="api-demo-input"
-        />
-        <button
-          onClick={handlePost}
-          disabled={loading || !csrfReady}
-          className="api-demo-button"
-        >
-          {loading ? "Sending..." : "Send Message"}
-        </button>
-      </div>
-      {responseText && (
-        <div className="api-demo-response">
-          {responseText}
+    <div className="l-container u-py-4">
+      <h1 className="u-mb-4">API Demo</h1>
+      <div className="c-api-demo">
+        <div className="c-api-demo__form">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Type a message..."
+            className="c-api-demo__input"
+            disabled={loading || !csrfReady}
+          />
+          <button
+            onClick={handlePost}
+            disabled={loading || !csrfReady}
+            className="c-button c-button--primary"
+          >
+            {loading ? 'Sending...' : 'Send to API'}
+          </button>
         </div>
-      )}
+        
+        {responseText && (
+          <div className="c-api-demo__response">
+            <pre className="c-api-demo__pre">{responseText}</pre>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
