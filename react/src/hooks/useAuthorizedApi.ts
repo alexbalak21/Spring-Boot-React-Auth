@@ -1,19 +1,24 @@
 // hooks/useAuthorizedApi.ts
 import axios from "axios";
+import { useMemo } from "react";
 
 export function useAuthorizedApi() {
-  const api = axios.create({
-    baseURL: "/api",
-  });
+  const api = useMemo(() => {
+    const instance = axios.create({
+      baseURL: "/api",
+    });
 
-  // Always read the latest token from localStorage
-  api.interceptors.request.use((config) => {
-    const token = localStorage.getItem("access_token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  });
+    // Always read the latest token from localStorage
+    instance.interceptors.request.use((config) => {
+      const token = localStorage.getItem("access_token");
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    });
+
+    return instance;
+  }, []);
 
   return api;
 }
