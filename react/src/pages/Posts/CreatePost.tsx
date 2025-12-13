@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthorizedApi } from "../../hooks/useAuthorizedApi";
+import { useToast } from "../../components/ToastContainer";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 
@@ -13,6 +14,7 @@ export default function CreatePost() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const api = useAuthorizedApi();
   const navigate = useNavigate();
+  const toast = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,6 +33,7 @@ export default function CreatePost() {
         body: body.trim(),
       });
 
+      toast.success("Post created successfully!");
       // Redirect to the posts page
       navigate("/posts");
     } catch (err: any) {

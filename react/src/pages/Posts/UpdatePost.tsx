@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuthorizedApi } from "../../hooks/useAuthorizedApi";
+import { useToast } from "../../components/ToastContainer";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 
@@ -15,6 +16,7 @@ export default function UpdatePost() {
   const [isLoading, setIsLoading] = useState(true);
   const api = useAuthorizedApi();
   const navigate = useNavigate();
+  const toast = useToast();
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -58,6 +60,7 @@ export default function UpdatePost() {
         body: body.trim(),
       });
 
+      toast.success("Post updated successfully!");
       // Redirect to posts page
       navigate("/posts");
     } catch (err: any) {

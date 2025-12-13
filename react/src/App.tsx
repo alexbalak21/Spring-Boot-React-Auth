@@ -9,6 +9,7 @@ import Navbar from "./components/Navbar";
 import CreatePost from "./pages/Posts/CreatePost";
 import Posts from "./pages/Posts/Posts";
 import UpdatePost from "./pages/Posts/UpdatePost";
+import ToastContainer from "./components/ToastContainer";
 
 export default function App() {
   return (
@@ -29,6 +30,8 @@ export default function App() {
             <Route path="/edit-post/:id" element={<UpdatePost />} />
           </Routes>
         </main>
+
+        <ToastContainer position="top-right" />
       </div>
     </Router>
   );}
