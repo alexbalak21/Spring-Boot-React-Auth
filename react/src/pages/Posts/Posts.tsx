@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthorizedApi } from "../../hooks/useAuthorizedApi";
-import { useToast } from "../../components/ToastContainer";
 import Button from "../../components/Button";
 
 const MY_POSTS_URL = "/posts/my-posts";
@@ -21,7 +20,6 @@ export default function Posts() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const toast = useToast();
 
   useEffect(() => {
     const fetchPosts = async () => {
