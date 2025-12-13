@@ -1,17 +1,26 @@
-    package app.controller;
+package app.controller;
 
-    import app.dto.UserInfo;
-    import app.security.CustomUserDetails;
-    import org.springframework.http.ResponseEntity;
-    import org.springframework.security.core.Authentication;
-    import org.springframework.web.bind.annotation.GetMapping;
-    import org.springframework.web.bind.annotation.RequestMapping;
-    import org.springframework.web.bind.annotation.RestController;
+import app.dto.UpdateUserRequest;
+import app.dto.UserInfo;
+import app.model.User;
+import app.security.CustomUserDetails;
+import app.service.UserService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
-    @RestController
-    @RequestMapping("/api")
-    public class UserController {
-        
+import jakarta.validation.Valid;
+
+@RestController
+@RequestMapping("/api")
+public class UserController {
+    
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
     @GetMapping("/user")
     public ResponseEntity<UserInfo> currentUser(Authentication authentication) {
         System.out.println("Fetching current user information...");
@@ -38,4 +47,15 @@
 
         return ResponseEntity.status(500).build();
     }
+
+    @PutMapping("/user/profile")
+    public ResponseEntity<UserInfo> updateProfile(@Valid @RequestBody UpdateUserRequest updateRequest) {
+        try {
+            User currentUser = userService.getCurrentUser();
+            User updatedUser = userService.updateUser(currentUser.getId(), updateRequest);
+            return ResponseEntity.ok(new UserInfo(updatedUser));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
+}

@@ -34,6 +34,16 @@ public class UserInfo {
         this.createdAt = null;
         this.updatedAt = null;
     }
+    
+    // Construct from app.model.User entity
+    public UserInfo(app.model.User user) {
+        this.id = user.getId();
+        this.name = user.getName();
+        this.email = user.getEmail();
+        this.role = user.getRole() != null ? user.getRole().name() : null;
+        this.createdAt = user.getCreatedAt() != null ? user.getCreatedAt().toString() : null;
+        this.updatedAt = user.getUpdatedAt() != null ? user.getUpdatedAt().toString() : null;
+    }
 
     // getters
     public Long getId() { return id; }
