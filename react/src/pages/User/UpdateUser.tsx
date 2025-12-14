@@ -38,6 +38,7 @@ export default function UpdateUser() {
         const response = await api.get('/user');
         const userData = response.data;
         setUser(userData);
+        console.log(user);
         setFormData({
           name: userData.name,
           email: userData.email
