@@ -9,13 +9,22 @@ import {
 } from "@headlessui/react";
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 function classNames(...classes: Array<string | false | null | undefined>): string {
   return classes.filter(Boolean).join(" ");
 }
 
 export default function Navbar() {
+  const { authenticated, clearAccessToken } = useAuth();
   const location = useLocation();
+
+  const handleLogout = () => {
+    if (confirm("Log out now?")) {
+      clearAccessToken();
+      window.location.href = "/login";
+    }
+  };
 
   const navigation = [
     { name: "Home", href: "/" },
@@ -70,16 +79,17 @@ export default function Navbar() {
 
           {/* Right side buttons */}
           <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-            <button
+            {/* <button
               type="button"
               aria-label="View notifications"
               className="relative rounded-full p-1 text-gray-400 hover:text-black focus:outline-2 focus:outline-offset-2 focus:outline-indigo-500"
             >
               <BellIcon aria-hidden="true" className="size-6" />
-            </button>
+            </button> */}
 
             {/* Profile dropdown */}
-            <Menu as="div" className="relative ml-3">
+            {authenticated ? (
+                          <Menu as="div" className="relative ml-3">
               <MenuButton className="relative flex rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
                 <span className="sr-only">Open user menu</span>
                 <img
@@ -98,18 +108,34 @@ export default function Navbar() {
                            data-enter:duration-100 data-enter:ease-out 
                            data-leave:duration-75 data-leave:ease-in"
               >
-                {["Your profile", "Settings", "Sign out"].map((label) => (
-                  <MenuItem key={label}>
+                <MenuItem>
                     <a
-                      href="#"
+                      onClick={handleLogout}
                       className="block px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900 data-focus:bg-gray-100 data-focus:text-gray-900"
                     >
-                      {label}
+                      Logout
                     </a>
                   </MenuItem>
-                ))}
               </MenuItems>
             </Menu>
+
+            ) :
+            (
+               <>
+                  <Link
+                    to="/login"
+                    className="block text-gray-700 px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    to="/register"
+                    className="block text-indigo-600 px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100"
+                  >
+                    Sign up
+                  </Link>
+                </>
+            )}
           </div>
         </div>
       </div>
