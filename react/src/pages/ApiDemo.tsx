@@ -16,7 +16,6 @@ export default function ApiDemo() {
   const [responseText, setResponseText] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // ✅ use the custom hook
   const csrfReady = useCsrf();
 
   const handlePost = async () => {
@@ -29,7 +28,14 @@ export default function ApiDemo() {
     setResponseText(null);
     try {
       const res = await axios.post(API_BASE, { message: input });
-      setResponseText(JSON.stringify(res.data, null, 2));
+
+      // 🔎 Adjust depending on your API response:
+      // If backend returns a plain string (e.g. "hello"):
+      setResponseText(res.data);
+
+      // If backend returns an object like { message: "hello" }:
+      // setResponseText(res.data.message);
+
       setInput("");
     } catch (err: any) {
       const serverMessage =
@@ -60,7 +66,9 @@ export default function ApiDemo() {
         </Button>
       </div>
       {responseText && (
-        <pre className="bg-gray-50 p-4 rounded-md font-mono text-sm whitespace-pre-wrap">{responseText}</pre>
+        <pre className="bg-gray-50 p-4 rounded-md font-mono text-sm whitespace-pre-wrap">
+          {responseText}
+        </pre>
       )}
     </div>
   );

@@ -82,10 +82,14 @@ public class OriginValidationFilter extends OncePerRequestFilter {
                     return;
                 }
             } else {
-                // Same-origin request (no Origin header): verify Referer matches server origin
-                boolean refererMatches = (referer != null) && referer.startsWith(serverOrigin);
+                // Same-origin request (no Origin header): verify Referer matches server origin OR allowedOrigin
+                boolean refererMatches = (referer != null) &&
+                    (referer.startsWith(serverOrigin) || referer.startsWith(allowedOrigin));
+
                 if (!refererMatches) {
-                    logger.warn("Rejected request to " + requestPath + " - no Origin header and Referer mismatch. referer=" + referer + ", serverOrigin=" + serverOrigin);
+                    logger.warn("Rejected request to " + requestPath +
+                        " - no Origin header and Referer mismatch. referer=" + referer +
+                        ", serverOrigin=" + serverOrigin + ", allowedOrigin=" + allowedOrigin);
                     response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                     response.getWriter().write("Origin header is required or Referer must be from same origin");
                     return;

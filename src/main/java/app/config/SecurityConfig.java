@@ -52,7 +52,7 @@ public class SecurityConfig {
         "/favicon.ico", "/error",
         "/api/auth/register",
         "/api/auth/login",
-        "/api/csrf","/api/message",
+        "/api/csrf","/api/demo",
         "/about", "/login", "/register", "/user"
     };
 
