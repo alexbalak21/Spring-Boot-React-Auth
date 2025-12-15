@@ -10,6 +10,7 @@ import UserLayout from "./layouts/UserLayout";
 import Profile from "./pages/User/Profile";
 import UpdateProfile from "./pages/User/UpdateProfile";
 import UpdateUserPassword from "./pages/User/UpdateUserPassword";
+import { AuthProvider } from "./context/AuthContext";
 
 export default function App() {
   const userLinks = [
@@ -19,6 +20,7 @@ export default function App() {
 ];
 
   return (
+    <AuthProvider>
     <Router>
       <div className="h-screen bg-gray-50 flex flex-col">
         <Navbar />
@@ -44,5 +46,6 @@ export default function App() {
         <ToastContainer position="top-right" />
       </div>
     </Router>
+  </AuthProvider>
   );
 }
