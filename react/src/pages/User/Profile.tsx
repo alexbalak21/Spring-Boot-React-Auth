@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCsrf } from "../../hooks/useCsrf";
 import { useAuthorizedApi } from "../../hooks/useAuthorizedApi";
-import { useLogout } from "../../hooks/useLogout";
 import Button from "../../components/Button";
 
 const USER_URL = "/user";
@@ -25,7 +24,6 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const { logout, loading: logoutLoading } = useLogout();
 
   useEffect(() => {
     if (!csrfReady) return;
@@ -61,16 +59,6 @@ export default function Profile() {
             onClick={() => navigate("/update-profile")}
           >
             Edit Profile
-          </Button>
-          <Button
-            variant="danger"
-            onClick={() => {
-              if (confirm("Log out now?")) logout();
-            }}
-            disabled={logoutLoading}
-            loading={logoutLoading}
-          >
-            {logoutLoading ? "Logging out..." : "Logout"}
           </Button>
         </div>
       </div>
