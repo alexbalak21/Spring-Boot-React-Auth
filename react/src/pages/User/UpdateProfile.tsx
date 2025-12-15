@@ -14,7 +14,7 @@ interface UserInfo {
   updatedAt: string;
 }
 
-export default function UpdateUser() {
+export default function UpdateProfile() {
   const csrfReady = useCsrf();
   const navigate = useNavigate();
   const api = useAuthorizedApi();
@@ -86,7 +86,7 @@ export default function UpdateUser() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
           <p className="mt-2 text-gray-600">Loading user information...</p>
@@ -113,8 +113,7 @@ export default function UpdateUser() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl p-6">
+      <div className="max-w-md bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl p-6 min-w-100">
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-gray-900">Update Profile</h2>
           <p className="mt-2 text-sm text-gray-600">Update your account information</p>
@@ -167,18 +166,8 @@ export default function UpdateUser() {
           </div>
 
           <div className="flex items-center justify-between pt-4">
-            {/* Left side: Change Password */}
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => navigate('/update-password')}
-              className="w-full sm:w-auto"
-            >
-              Change Password
-            </Button>
-
             {/* Right side: Cancel + Update Profile */}
-            <div className="flex items-center space-x-3">
+          
               <Button 
                 type="button" 
                 onClick={() => navigate('/user')}
@@ -194,10 +183,9 @@ export default function UpdateUser() {
               >
                 {submitting ? 'Updating...' : 'Update Profile'}
               </Button>
-            </div>
+            
           </div>
         </form>
       </div>  
-    </div>
   );
 }

@@ -8,7 +8,7 @@ import Navbar from "./components/Navbar";
 import ToastContainer from "./components/ToastContainer";
 import UserLayout from "./layouts/UserLayout";
 import Profile from "./pages/User/Profile";
-import UpdateUser from "./pages/User/UpdateUser";
+import UpdateProfile from "./pages/User/UpdateProfile";
 import UpdateUserPassword from "./pages/User/UpdateUserPassword";
 
 export default function App() {
@@ -23,7 +23,7 @@ export default function App() {
       <div className="h-screen bg-gray-50 flex flex-col">
         <Navbar />
 
-        <div className="w-full h-full">
+        <div className="flex-1 w-full">
           <Routes>
             {/* Normal pages without sidebar */}
             <Route path="/" element={<Home />} />
@@ -35,7 +35,7 @@ export default function App() {
             {/* User-related pages with sidebar */}
            <Route element={<UserLayout links={userLinks} position="left" />}>
             <Route path="/profile" element={<Profile />} />
-            <Route path="/update-profile" element={<UpdateUser />} />
+            <Route path="/update-profile" element={<UpdateProfile />} />
             <Route path="/update-password" element={<UpdateUserPassword />} />
           </Route>
           </Routes>

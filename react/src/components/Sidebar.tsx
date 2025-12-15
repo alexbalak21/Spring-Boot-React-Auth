@@ -18,7 +18,7 @@ export default function Sidebar({ links }: SidebarProps) {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 p-4 h-[calc(100vh-65px)]">
+    <aside className="w-full h-full bg-white border-r border-gray-200 p-4">
       <h2 className="text-lg font-semibold mb-4">User Menu</h2>
       <nav className="space-y-2">
         {links.map((item) => (

@@ -53,8 +53,8 @@ export default function UpdateUserPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden p-6">
+
+      <div className="max-w-md bg-white rounded-xl shadow-md overflow-hidden p-6 min-w-100">
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold text-gray-900">Update Password</h2>
           <p className="mt-2 text-sm text-gray-600">
@@ -113,7 +113,7 @@ export default function UpdateUserPassword() {
             autoComplete="new-password"
           />
 
-          <div className="flex items-center justify-end space-x-3 pt-2">
+          <div className="flex items-center justify-between space-x-3 pt-2">
             <Button
               type="button"
               variant="secondary"
@@ -133,6 +133,6 @@ export default function UpdateUserPassword() {
           </div>
         </form>
       </div>
-    </div>
+
   );
 }
