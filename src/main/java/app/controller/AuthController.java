@@ -44,12 +44,18 @@ public class AuthController {
 
             CustomUserDetails principal = (CustomUserDetails) authentication.getPrincipal();
             String token = jwtService.generateToken(principal);
-            return ResponseEntity.ok(Map.of("access_token", token));
+
+            // Wrap both token and user info
+            return ResponseEntity.ok(Map.of(
+                "access_token", token,
+                "user", new app.dto.UserInfo(principal)
+            ));
 
         } catch (org.springframework.security.core.AuthenticationException e) {
             return ResponseEntity.status(401).body(Map.of("error", "Invalid credentials"));
         }
     }
+
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {

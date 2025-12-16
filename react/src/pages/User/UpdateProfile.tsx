@@ -1,64 +1,39 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useCsrf } from '../../hooks/useCsrf';
-import { useAuthorizedApi } from '../../hooks/useAuthorizedApi';
-import Button from '../../components/Button';
-import Input from '../../components/Input';
-
-interface UserInfo {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuthorizedApi } from "../../hooks/useAuthorizedApi";
+import Button from "../../components/Button";
+import Input from "../../components/Input";
+import { useUser } from "../../context/UserContext";
 
 export default function UpdateProfile() {
-  const csrfReady = useCsrf();
   const navigate = useNavigate();
   const api = useAuthorizedApi();
-  
-  const [user, setUser] = useState<UserInfo | null>(null);
+
+  const { user, setUser } = useUser();
+
   const [formData, setFormData] = useState({
-    name: '',
-    email: ''
+    name: "",
+    email: "",
   });
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  // Fetch current user data
+  // Initialize form with user data when available
   useEffect(() => {
-    if (!csrfReady) return;
-
-    const fetchUser = async () => {
-      try {
-        const response = await api.get('/user');
-        const userData = response.data;
-        setUser(userData);
-        console.log(user);
-        setFormData({
-          name: userData.name,
-          email: userData.email
-        });
-      } catch (err: any) {
-        console.error('Failed to fetch user:', err);
-        setError(err.response?.data?.message || 'Failed to load user information');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUser();
-  }, [csrfReady, api]);
+    if (user) {
+      setFormData({
+        name: user.name,
+        email: user.email,
+      });
+    }
+  }, [user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -68,23 +43,24 @@ export default function UpdateProfile() {
     setError(null);
 
     try {
-      const response = await api.put('/user/profile', formData);
-      setUser(response.data);
+      const response = await api.put("/user/profile", formData);
+      setUser(response.data); // update context with new user info
       setSuccess(true);
-      // Reset success message after 3 seconds
+
+      // Reset success message after 3 seconds and redirect
       setTimeout(() => {
         setSuccess(false);
-        navigate('/user');
+        navigate("/user");
       }, 3000);
     } catch (err: any) {
-      console.error('Update failed:', err);
-      setError(err.response?.data?.message || 'Failed to update profile');
+      console.error("Update failed:", err);
+      setError(err.response?.data?.message || "Failed to update profile");
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (loading) {
+  if (!user) {
     return (
       <div className="flex items-center justify-center">
         <div className="text-center">
@@ -95,97 +71,92 @@ export default function UpdateProfile() {
     );
   }
 
-  if (error) {
-    return (
-      <div className="max-w-md mx-auto mt-10 p-4 bg-red-50 border-l-4 border-red-500">
-        <div className="flex">
-          <div className="flex-shrink-0">
-            <svg className="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-            </svg>
-          </div>
-          <div className="ml-3">
-            <p className="text-sm text-red-700">Error: {error}</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-      <div className="max-w-md bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl p-6 min-w-100">
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-gray-900">Update Profile</h2>
-          <p className="mt-2 text-sm text-gray-600">Update your account information</p>
+    <div className="max-w-md bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl p-6 min-w-100">
+      <div className="text-center mb-8">
+        <h2 className="text-2xl font-bold text-gray-900">Update Profile</h2>
+        <p className="mt-2 text-sm text-gray-600">Update your account information</p>
+      </div>
+
+      {error && (
+        <div className="mb-4 text-sm text-red-700 bg-red-100 p-3 rounded">
+          {error}
         </div>
-        
-        {success && (
-          <div className="mb-6 p-4 bg-green-50 rounded-md">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-green-800">
-                  Profile updated successfully! Redirecting...
-                </p>
-              </div>
+      )}
+
+      {success && (
+        <div className="mb-6 p-4 bg-green-50 rounded-md">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg
+                className="h-5 w-5 text-green-400"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium text-green-800">
+                Profile updated successfully! Redirecting...
+              </p>
             </div>
           </div>
-        )}
-        
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <Input
-              label="Full Name"
-              id="name"
-              name="name"
-              type="text"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              maxLength={100}
-              placeholder="Enter your full name"
-            />
-          </div>
-          
-          <div>
-            <Input
-              label="Email address"
-              id="email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              maxLength={100}
-              placeholder="Enter your email address"
-            />
-          </div>
+        </div>
+      )}
 
-          <div className="flex items-center justify-between pt-4">
-            {/* Right side: Cancel + Update Profile */}
-          
-              <Button 
-                type="button" 
-                onClick={() => navigate('/user')}
-                variant="secondary"
-                className="w-full sm:w-auto"
-              >
-                Cancel
-              </Button>
-              <Button 
-                type="submit" 
-                disabled={submitting}
-                className="w-full sm:w-auto"
-              >
-                {submitting ? 'Updating...' : 'Update Profile'}
-              </Button>
-            
-          </div>
-        </form>
-      </div>  
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div>
+          <Input
+            label="Full Name"
+            id="name"
+            name="name"
+            type="text"
+            value={formData.name}
+            onChange={handleChange}
+            required
+            maxLength={100}
+            placeholder="Enter your full name"
+          />
+        </div>
+
+        <div>
+          <Input
+            label="Email address"
+            id="email"
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+            maxLength={100}
+            placeholder="Enter your email address"
+          />
+        </div>
+
+        <div className="flex items-center justify-between pt-4">
+          <Button
+            type="button"
+            onClick={() => navigate("/user")}
+            variant="secondary"
+            className="w-full sm:w-auto"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            disabled={submitting}
+            className="w-full sm:w-auto"
+          >
+            {submitting ? "Updating..." : "Update Profile"}
+          </Button>
+        </div>
+      </form>
+    </div>
   );
 }

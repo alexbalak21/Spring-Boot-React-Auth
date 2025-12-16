@@ -1,7 +1,8 @@
 import { useState } from "react";
 import axios from "axios";
 import { useCsrf } from "../hooks/useCsrf";
-import { useAuth } from "../context/AuthContext";   // <-- use context here
+import { useAuth } from "../context/AuthContext";
+import { useUser } from "../context/UserContext";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "../components/ToastContainer";
 import Button from "../components/Button";
@@ -16,7 +17,8 @@ interface LoginFormData {
 
 export default function Login() {
   useCsrf();
-  const { setAccessToken } = useAuth();   // <-- context
+  const { setAccessToken } = useAuth();
+  const { setUser } = useUser();   // <-- get setUser from context
   const navigate = useNavigate();
   const toast = useToast();
 
@@ -53,12 +55,15 @@ export default function Login() {
       });
 
       const access_token = response.data?.access_token;
-      if (access_token) {
-        setAccessToken(access_token);   // <-- updates context state
+      const user = response.data?.user;
+
+      if (access_token && user) {
+        setAccessToken(access_token);
+        setUser(user);
         toast.success("Login successful!");
-        navigate("/");                  // Navbar will re-render automatically
+        navigate("/"); 
       } else {
-        setError("No access token returned from server");
+        setError("No access token or user returned from server");
       }
     } catch (err: any) {
       const errorMessage =

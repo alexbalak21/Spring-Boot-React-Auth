@@ -1,10 +1,15 @@
 import { useState } from "react";
 import { useAuthorizedApi } from "./useAuthorizedApi";
-import { useAuthToken } from "./useAuthToken";
+import { useAuth } from "../context/AuthContext";   // use same context
+import { useUser } from "../context/UserContext";
+import { useNavigate } from "react-router-dom";
 
 export function useLogout() {
   const api = useAuthorizedApi();
-  const { clearAccessToken } = useAuthToken();
+  const { clearAccessToken } = useAuth();   // unified
+  const { setUser } = useUser();
+  const navigate = useNavigate();
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -12,21 +17,14 @@ export function useLogout() {
     setLoading(true);
     setError(null);
     try {
-      // call server logout endpoint (optional for stateless JWT)
       await api.post("/api/auth/logout", {}, { withCredentials: true });
     } catch (err: any) {
-      // ignore server errors for logout, but record if useful
       setError(err?.response?.data?.message || err?.message || "Logout failed");
     } finally {
-      // Always clear the token client-side
-      clearAccessToken();
+      clearAccessToken();   // clears token in AuthContext
+      setUser(null);        // clears cached user
       setLoading(false);
-      // Redirect to login page (client-side route)
-      try {
-        window.location.href = "/login";
-      } catch (e) {
-        // no-op
-      }
+      navigate("/");   // redirect to home page
     }
   };
 

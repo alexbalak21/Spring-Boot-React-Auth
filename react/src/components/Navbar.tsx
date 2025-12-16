@@ -11,23 +11,24 @@ import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Avatar from "./Avatar";
+import { useLogout } from "../hooks/useLogout";
+import Confirm from "./Confirm";
+import { useState } from "react";
+import { useUser } from "../context/UserContext";
+
 
 function classNames(...classes: Array<string | false | null | undefined>): string {
   return classes.filter(Boolean).join(" ");
 }
 
 export default function Navbar() {
-  const { authenticated, clearAccessToken } = useAuth();
+  const { logout, loading } = useLogout();
+  const [showConfirm, setShowConfirm] = useState(false);
+  const { authenticated } = useAuth();
+   const { user } = useUser();
   const location = useLocation();
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    if (confirm("Log out now?")) {
-      clearAccessToken();
-      navigate("/login"); // no full reload
-    }
-  };
-
+ 
+  
   const navigation = [
     { name: "Home", href: "/" },
     { name: "About", href: "/about" },
@@ -85,7 +86,7 @@ export default function Navbar() {
               <Menu as="div" className="relative ml-3">
                 <MenuButton className="relative flex rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500">
                   <span className="sr-only">Open user menu</span>
-                  <Avatar name="Alex" imageUrl="" size={32} bgColor="bg-gray-400" textColor="text-white" />
+                  <Avatar name={user?.name ?? "?"} imageUrl="" size={32} bgColor="bg-gray-400" textColor="text-white" />
                 </MenuButton>
                 <MenuItems
                   transition
@@ -105,14 +106,26 @@ export default function Navbar() {
                     </Link>
                   </MenuItem>
                   <MenuItem>
-                    <button
-                      onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                    >
-                      Logout
-                    </button>
-                  </MenuItem>
+                  <button
+                    onClick={() => setShowConfirm(true)}
+                    disabled={loading}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                  >
+                    Logout
+                  </button>
+                </MenuItem>
                 </MenuItems>
+                 {/* Confirm modal */}
+                <Confirm
+                  open={showConfirm}
+                  title="Logout ?"
+                  message="Are you sure you want to log out?"
+                  onConfirm={() => {
+                    setShowConfirm(false);
+                    logout();
+                  }}
+                  onCancel={() => setShowConfirm(false)}
+                />
               </Menu>
             ) : (
               <>

@@ -1,53 +1,10 @@
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useCsrf } from "../../hooks/useCsrf";
-import { useAuthorizedApi } from "../../hooks/useAuthorizedApi";
 import Button from "../../components/Button";
-
-const USER_URL = "/user";
-
-interface UserInfo {
-  id: number;
-  name: string;
-  email: string;
-  role: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import { useUser } from "../../context/UserContext";
 
 export default function Profile() {
-  const csrfReady = useCsrf();
-  const api = useAuthorizedApi();
-
-  const [user, setUser] = useState<UserInfo | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { user } = useUser();
   const navigate = useNavigate();
-
-
-  useEffect(() => {
-    if (!csrfReady) return;
-
-    const fetchUser = async () => {
-      try {
-        const response = await api.get(USER_URL, {
-          headers: { "X-Requested-With": "XMLHttpRequest" },
-          withCredentials: true,
-        });
-        setUser(response.data);
-      } catch (err: any) {
-        setError(
-          err.response?.data?.message ||
-            err.response?.data?.error ||
-            "Failed to load user info"
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUser();
-  }, [csrfReady, api]);
 
   return (
     <div className="w-full max-w-lg bg-white rounded-lg shadow-md p-8">
@@ -63,11 +20,8 @@ export default function Profile() {
         </div>
       </div>
 
-      {loading && <p className="text-gray-600">Loading user info...</p>}
-      {error && (
-        <div className="mb-4 text-sm text-red-700 bg-red-100 p-3 rounded">
-          {error}
-        </div>
+      {!user && (
+        <p className="text-gray-600">Loading user info...</p>
       )}
 
       {user && (
