@@ -14,7 +14,7 @@ public class UserProfileImage {
 
     // Store image as BLOB
     @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "LONGBLOB")
     private byte[] imageData;
 
     // Link to User
