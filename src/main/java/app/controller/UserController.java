@@ -3,6 +3,7 @@ package app.controller;
 import app.dto.UpdatePasswordRequest;
 import app.dto.UpdateUserRequest;
 import app.dto.UserInfo;
+import app.dto.UserInfoProfileImage;
 import app.dto.UserProfileImageDto;
 import app.model.User;
 import app.model.UserProfileImage;
@@ -11,6 +12,9 @@ import app.service.UserService;
 import io.jsonwebtoken.io.IOException;
 import app.service.UserProfileImageService;
 import jakarta.validation.Valid;
+
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -30,20 +34,25 @@ public class UserController {
         this.userProfileImageService = userProfileImageService;
     }
 
-    // Get current authenticated user
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/user")
-    public ResponseEntity<UserInfo> currentUser(Authentication authentication) {
+    public ResponseEntity<UserInfoProfileImage> currentUser(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(403).build();
         }
 
         Object principal = authentication.getPrincipal();
         if (principal instanceof CustomUserDetails user) {
-            return ResponseEntity.ok(new UserInfo(user));
+            // Fetch Base64 image from service
+            String base64Image = userProfileImageService.getBase64Image(user.getId());
+
+            // Wrap into DTO
+            UserInfoProfileImage userInfo_ProfileImage = new UserInfoProfileImage(new UserInfo(user), base64Image);
+
+            return ResponseEntity.ok(userInfo_ProfileImage);
         }
 
-        return ResponseEntity.status(500).body(null);
+        return ResponseEntity.status(500).build();
     }
 
     // Update profile (name, email, etc.)
