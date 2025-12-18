@@ -20,7 +20,7 @@ export default function Profile() {
   // Make updateUser return the updated user from backend
   const updateUser = async (payload: UserDto) => {
     try {
-      const response = await api.patch("/user/profile", payload); 
+      const response = await api.patch("/user/profile", payload);
       return response.data; // updated user object
     } catch (err: any) {
       // Extract backend error message if available
@@ -59,25 +59,33 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Avatar at top center */}
+      {/* Avatar with overlay */}
       <div className="flex justify-center mb-6">
-        <div>
-          {user && (
-          <Avatar
-            name={user.name}
-            imageUrl={
-              user?.profileImage
-                ? `data:image/png;base64,${user.profileImage}`
-                : undefined
-            }
-            size={64}
-            bgColor="bg-gray-400"
-            textColor="text-white"
-          />
+        {user && (
+          <div className="relative group">
+            <Avatar
+              name={user.name}
+              imageUrl={
+                user?.profileImage
+                  ? `data:image/png;base64,${user.profileImage}`
+                  : undefined
+              }
+              size={64}
+              bgColor="bg-gray-400"
+              textColor="text-white"
+            />
+            {/* Overlay PlusIcon */}
+            <button
+              className="absolute inset-0 flex items-center justify-center 
+                   bg-black/50 rounded-full opacity-0 group-hover:opacity-100 
+                   transition"
+            >
+              <PlusIcon className="h-6 w-6 text-white" />
+            </button>
+          </div>
         )}
-        <button className="rounded-md hover:bg-gray-100 block ms-auto"><PlusIcon className="h-6 w-6 text-gray-500" /></button>
-        </div>
       </div>
+
 
       {!user && <p className="text-gray-600">Loading user info...</p>}
 
