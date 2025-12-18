@@ -4,6 +4,8 @@ import { useUser } from "../../context/UserContext";
 import Avatar from "../../components/Avatar";
 import EditableField from "../../components/EditableField";
 import { useAuthorizedApi } from "../../hooks/useAuthorizedApi";
+import { PlusIcon } from "@heroicons/react/24/outline";
+
 
 interface UserDto {
   name?: string;
@@ -18,7 +20,7 @@ export default function Profile() {
   // Make updateUser return the updated user from backend
   const updateUser = async (payload: UserDto) => {
     try {
-      const response = await api.patch("/user/profile", payload);
+      const response = await api.patch("/user/profile", payload); 
       return response.data; // updated user object
     } catch (err: any) {
       // Extract backend error message if available
@@ -59,7 +61,8 @@ export default function Profile() {
 
       {/* Avatar at top center */}
       <div className="flex justify-center mb-6">
-        {user && (
+        <div>
+          {user && (
           <Avatar
             name={user.name}
             imageUrl={
@@ -72,6 +75,8 @@ export default function Profile() {
             textColor="text-white"
           />
         )}
+        <button className="rounded-md hover:bg-gray-100 block ms-auto"><PlusIcon className="h-6 w-6 text-gray-500" /></button>
+        </div>
       </div>
 
       {!user && <p className="text-gray-600">Loading user info...</p>}
