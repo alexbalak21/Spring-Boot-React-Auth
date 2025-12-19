@@ -1,21 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth } from "./AuthContext";
-
-interface UserInfo {
-  id: number;
-  name: string;
-  email: string;
-  roles: string[];
-  createdAt: string;
-  updatedAt: string;
-  profileImage: string;
-}
-
-interface UserContextType {
-  user: UserInfo | null;
-  setUser: (user: UserInfo | null) => void;
-}
+import type { UserInfo, UserContextType } from "../types";
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 

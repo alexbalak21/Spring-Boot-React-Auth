@@ -6,28 +6,25 @@ interface UploadProfileImageProps {
 }
 
 export default function UploadProfileImage({ api }: UploadProfileImageProps) {
-  const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [preview, setPreview] = useState<string | null>(null); // 👈 holds Base64 image data
+  const [preview, setPreview] = useState<string | null>(null);
 
-  // Ref to the hidden file input
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-      setError(null);
-      setSuccess(false);
-    }
-  };
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const handleUpload = async () => {
-    if (!file) {
-      setError("Please select an image");
+    setError(null);
+    setSuccess(false);
+
+    // Optional: client-side validation
+    if (!file.type.startsWith("image/")) {
+      setError("Please select a valid image");
       return;
     }
+
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -36,24 +33,20 @@ export default function UploadProfileImage({ api }: UploadProfileImageProps) {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      console.log("Upload response:", response.data);
-
       if (response.data.imageData) {
-        setPreview(response.data.imageData); // 👈 set preview from backend
+        setPreview(response.data.imageData);
       }
 
       setSuccess(true);
-      setError(null);
-    } catch (err: any) {
-      console.error("Upload failed:", err);
+    } catch (err) {
+      console.error(err);
       setError("Failed to upload image");
-      setSuccess(false);
     }
   };
 
   return (
     <div className="mb-6">
-      {/* 👇 Small preview at the top */}
+      {/* Preview */}
       {preview && (
         <div className="mb-4 flex justify-center">
           <img
@@ -64,7 +57,7 @@ export default function UploadProfileImage({ api }: UploadProfileImageProps) {
         </div>
       )}
 
-      {/* Hidden file input */}
+      {/* Hidden input */}
       <input
         type="file"
         accept="image/*"
@@ -73,25 +66,15 @@ export default function UploadProfileImage({ api }: UploadProfileImageProps) {
         className="hidden"
       />
 
-      {/* Button to open file picker */}
+      {/* Single button */}
       <button
         type="button"
         onClick={() => fileInputRef.current?.click()}
-        className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 mr-2"
+        className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
       >
-        Select Image
+        Select & Upload Image
       </button>
 
-      {/* Button to upload */}
-      <button
-        type="button"
-        onClick={handleUpload}
-        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-      >
-        Upload Image
-      </button>
-
-      {file && <p className="mt-2 text-sm text-gray-600">Selected: {file.name}</p>}
       {error && <p className="text-red-500 mt-2">{error}</p>}
       {success && <p className="text-green-500 mt-2">Image uploaded successfully!</p>}
     </div>

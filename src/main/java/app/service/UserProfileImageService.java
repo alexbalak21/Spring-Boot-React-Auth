@@ -27,27 +27,27 @@ public class UserProfileImageService {
     /**
      * Save or update compressed profile image for a user.
      */
-    public UserProfileImage saveCompressedImage(User user, MultipartFile file) throws IOException {
+    public String saveCompressedImage(User user, MultipartFile file) throws IOException {
         BufferedImage originalImage = ImageIO.read(file.getInputStream());
 
-        // Compress and resize
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         Thumbnails.of(originalImage)
-                  .size(120, 120)        // resize to 120x120
-                  .outputQuality(0.8)    // compression quality
-                  .outputFormat("jpg")
-                  .toOutputStream(baos);
+                .size(120, 120)
+                .outputQuality(0.8)
+                .outputFormat("jpg")
+                .toOutputStream(baos);
 
         byte[] compressedData = baos.toByteArray();
 
-        // If user already has an image, update it
         Optional<UserProfileImage> existing = repository.findByUserId(user.getId());
         UserProfileImage profileImage = existing.orElseGet(UserProfileImage::new);
 
         profileImage.setUser(user);
         profileImage.setImageData(compressedData);
 
-        return repository.save(profileImage);
+        UserProfileImage savedImage = repository.save(profileImage);
+
+        return Base64.getEncoder().encodeToString(savedImage.getImageData());
     }
 
     /**

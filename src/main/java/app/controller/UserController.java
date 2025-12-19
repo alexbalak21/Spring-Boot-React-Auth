@@ -4,9 +4,7 @@ import app.dto.UpdatePasswordRequest;
 import app.dto.UpdateUserRequest;
 import app.dto.UserInfo;
 import app.dto.UserInfoProfileImage;
-import app.dto.UserProfileImageDto;
 import app.model.User;
-import app.model.UserProfileImage;
 import app.security.CustomUserDetails;
 import app.service.UserService;
 import io.jsonwebtoken.io.IOException;
@@ -31,7 +29,6 @@ public class UserController {
         this.userService = userService;
         this.userProfileImageService = userProfileImageService;
     }
-
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping
@@ -69,7 +66,6 @@ public class UserController {
         }
     }
 
-    
     // Partial update profile (PATCH)
     @PreAuthorize("isAuthenticated()")
     @PatchMapping("/profile")
@@ -100,6 +96,7 @@ public class UserController {
         }
     }
 
+    //Updates the User profileImage 
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/profile-image")
     public ResponseEntity<?> uploadProfileImage(@RequestParam("file") MultipartFile file) {
@@ -109,14 +106,20 @@ public class UserController {
             }
 
             CustomUserDetails currentUser = userService.getCurrentUser();
-            UserProfileImage saved = userProfileImageService.saveCompressedImage(currentUser.getUser(), file);
 
-            // Return DTO instead of raw string
-            return ResponseEntity.ok(new UserProfileImageDto(saved.getImageData()));
+            // Save the new image
+            String savedImageBase64 = userProfileImageService.saveCompressedImage(currentUser.getUser(), file);
+
+            // Build full DTO (same as GET /api/user)
+            UserInfoProfileImage dto = new UserInfoProfileImage(new UserInfo(currentUser.getUser()), savedImageBase64);
+
+            return ResponseEntity.ok(dto);
+
         } catch (IOException e) {
             return ResponseEntity.badRequest().body("Invalid image file");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Failed to upload profile image");
         }
     }
+
 }

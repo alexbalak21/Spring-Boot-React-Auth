@@ -44,18 +44,6 @@ export default function UserMenu() {
           </Link>
         </MenuItem>
 
-        {/* Example role-based link */}
-        {user?.roles.includes("ADMIN") && (
-          <MenuItem>
-            <Link
-              to="/admin"
-              className="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 hover:text-red-900"
-            >
-              Admin Dashboard
-            </Link>
-          </MenuItem>
-        )}
-
         <MenuItem>
           <button
             onClick={() => setShowConfirm(true)}
