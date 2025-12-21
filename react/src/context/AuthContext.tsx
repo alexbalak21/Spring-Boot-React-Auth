@@ -20,8 +20,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   });
 
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  // Track refresh state and promise at module level to prevent multiple refreshes
+  const isRefreshing = useRef(false);
   const refreshPromise = useRef<Promise<string | null> | null>(null);
+  const refreshSubscribers = useRef<Array<(token: string | null) => void>>([]);
 
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
@@ -53,84 +55,125 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const refreshAccessToken = useCallback(async (): Promise<string | null> => {
-    if (isRefreshing && refreshPromise.current) {
-      return refreshPromise.current;
+    // If we already have a refresh in progress, return the existing promise
+    if (isRefreshing.current) {
+      return new Promise((resolve) => {
+        const unsubscribe = (token: string | null) => {
+          const index = refreshSubscribers.current.indexOf(unsubscribe);
+          if (index > -1) {
+            refreshSubscribers.current.splice(index, 1);
+          }
+          resolve(token);
+        };
+        refreshSubscribers.current.push(unsubscribe);
+      });
     }
 
-    const doRefresh = async (): Promise<string | null> => {
-      try {
-        const response = await fetch('/api/auth/refresh', {
-          method: 'POST',
-          credentials: 'include', // This ensures cookies are sent with the request
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-          },
-        });
+    isRefreshing.current = true;
 
-        if (!response.ok) {
-          throw new Error('Failed to refresh token');
-        }
+    try {
+      console.log('[Auth] Refreshing access token...');
+      const response = await fetch('/api/auth/refresh', {
+        method: 'POST',
+        credentials: 'include', // Important for sending refresh token cookie
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
 
-        const data = await response.json();
-        const newAccessToken = data.access_token || data.accessToken;
-
-        if (!newAccessToken) {
-          throw new Error('No access token in response');
-        }
-
-        setAccessToken(newAccessToken);
-        return newAccessToken;
-      } catch (error) {
-        console.error('Error refreshing token:', error);
-        clearAccessToken();
-        return null;
-      } finally {
-        setIsRefreshing(false);
-        refreshPromise.current = null;
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[Auth] Token refresh failed:', response.status, errorText);
+        throw new Error(`Failed to refresh token: ${response.status} ${errorText}`);
       }
-    };
 
-    setIsRefreshing(true);
-    const promise = doRefresh();
-    refreshPromise.current = promise;
-    return promise;
+      const data = await response.json().catch(() => ({}));
+      const newAccessToken = data.access_token || data.accessToken;
+
+      if (!newAccessToken) {
+        console.error('[Auth] No access token in refresh response:', data);
+        throw new Error('No access token in response');
+      }
+
+      console.log('[Auth] Successfully refreshed access token');
+      // Update the token in state and storage
+      setAccessToken(newAccessToken);
+
+      // Notify all waiting subscribers
+      refreshSubscribers.current.forEach(cb => cb(newAccessToken));
+      refreshSubscribers.current = [];
+
+      return newAccessToken;
+    } catch (error) {
+      console.error('Error refreshing token:', error);
+      // Notify all waiting subscribers of the error
+      refreshSubscribers.current.forEach(cb => cb(null));
+      refreshSubscribers.current = [];
+      clearAccessToken();
+      return null;
+    } finally {
+      isRefreshing.current = false;
+    }
   }, [isRefreshing, clearAccessToken]);
 
   // Create an API client that automatically handles token refresh
   const apiClient = useCallback(
     async (input: RequestInfo | URL, init: RequestInit = {}): Promise<Response> => {
       // Convert URL object to string if needed
-      const url = input instanceof URL ? input.toString() : input;
+      const url = input instanceof URL ? input.toString() : input.toString();
+      const isPublicEndpoint = ['/api/auth/refresh', '/api/csrf'].some(path =>
+        url.includes(path)
+      );
 
-      // Create headers object if it doesn't exist
-      const headers = new Headers(init.headers);
-      if (accessToken && !headers.has('Authorization')) {
-        headers.set('Authorization', `Bearer ${accessToken}`);
-      }
+      // Create a clean headers object
+      const headers = new Headers(init?.headers);
+
+      // Helper function to make the actual request
+      const makeRequest = async (token: string | null) => {
+        // Create a new headers object for each request to avoid header pollution
+        const requestHeaders = new Headers(init?.headers); // Start with original headers
+
+        // Set the authorization header if we have a token and it's not a public endpoint
+        if (token && !isPublicEndpoint) {
+          requestHeaders.set('Authorization', `Bearer ${token}`);
+        }
+
+        // Ensure we include credentials for all requests
+        const options: RequestInit = {
+          ...init,
+          headers: requestHeaders,
+          credentials: 'include' as const,
+        };
+
+        return fetch(url, options);
+      };
 
       // Make the initial request
-      let response = await fetch(url, {
-        ...init,
-        headers,
-      });
+      let response = await makeRequest(accessToken);
 
-      // Handle token expiration
-      if (response.status === 401 && response.headers.get('X-Token-Expired') === 'true') {
-        console.log("access_token expired");
-        const newToken = await refreshAccessToken();
+      // Handle token expiration (401 with X-Token-Expired header)
+      // Only attempt refresh for non-public endpoints and if we have a token
+      if (!isPublicEndpoint && accessToken && response.status === 401 && response.headers.get('X-Token-Expired') === 'true') {
+        console.log('[Auth] Access token expired, attempting refresh...');
 
-        if (newToken) {
-          // Update the authorization header with the new token
-          headers.set('Authorization', `Bearer ${newToken}`);
+        try {
+          // Get a new token using the refresh token
+          const newToken = await refreshAccessToken();
 
-          // Retry the original request with the new token
-          response = await fetch(url, {
-            ...init,
-            headers,
-          });
-        } else {
+          if (newToken) {
+            console.log('[Auth] Retrying original request with new token');
+            // Create a new request with the new token
+            return makeRequest(newToken);
+          } else {
+            console.error('[Auth] Failed to refresh access token');
+            clearAccessToken();
+            return response; // Return the original 401 response
+          }
+        } catch (error) {
+          console.error('[Auth] Error during token refresh:', error);
           clearAccessToken();
+          return response; // Return the original 401 response
         }
       }
 

@@ -29,8 +29,7 @@ export default function ApiDemo() {
     try {
       const res = await axios.post(API_BASE, { message: input });
 
-      // 🔎 Adjust depending on your API response:
-      // If backend returns a plain string (e.g. "hello"):
+      
       setResponseText(res.data);
 
       // If backend returns an object like { message: "hello" }:

@@ -34,9 +34,9 @@ public class AuthController {
             // Correct cookie settings
             ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refreshToken)
                     .httpOnly(true)
-                    .secure(true)              // works on localhost
-                    .sameSite("None")          // required for cross-site cookies
-                    .path("/api/auth/refresh") // MUST match refresh endpoint
+                    .secure(true)              
+                    .sameSite("None")         
+                    .path("/api/auth/refresh")
                     .maxAge(7 * 24 * 60 * 60)
                     .build();
 
