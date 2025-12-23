@@ -1,184 +1,236 @@
-# Suggested Improvements
+# Improvements & Refactoring Plan
 
-This document outlines potential improvements for the application's structure, code organization, and overall architecture.
+This document outlines a clear, professional roadmap to improve the React application.
+The goal is to make the codebase **modular, maintainable, scalable, and production-ready**.
 
-## 1. Directory Structure Improvements
+---
 
-### Current Structure
+## 1. Adopt a Feature-Based Architecture
+
+### Current Issue
+- Code is organized by type (components, hooks, context)
+- Features are spread across folders
+- Hard to scale and reason about ownership
+
+### Improvement
+Adopt a **feature-first** structure where each feature owns its logic, UI, hooks, and types.
+
 ```
 src/
-  components/
-  context/
-  hooks/
-  layouts/
-  pages/
-    User/
+├── app/
+│   ├── App.tsx
+│   ├── Providers.tsx
+│   ├── routes.tsx
+│   └── index.ts
+│
+├── features/
+│   ├── auth/
+│   │   ├── AuthContext.tsx
+│   │   ├── useAuth.ts
+│   │   ├── auth.api.ts
+│   │   ├── auth.types.ts
+│   │   └── index.ts
+│   │
+│   ├── user/
+│   │   ├── UserContext.tsx
+│   │   ├── UserMenu.tsx
+│   │   ├── ProfileImageUploader.tsx
+│   │   ├── user.types.ts
+│   │   └── index.ts
+│   │
+│   ├── layout/
+│   │   ├── Navbar.tsx
+│   │   ├── Sidebar.tsx
+│   │   └── index.ts
+│
+├── shared/
+│   ├── components/
+│   │   ├── Button.tsx
+│   │   ├── Input.tsx
+│   │   ├── EditableText.tsx
+│   │   └── index.ts
+│   │
+│   ├── hooks/
+│   │   ├── useCsrf.ts
+│   │   └── index.ts
+│   │
+│   ├── lib/
+│   │   ├── apiClient.ts
+│   │   └── storage.ts
+│
+├── styles/
+│   └── main.css
+│
+└── main.tsx
 ```
 
-### Suggested Structure
-```
-src/
-  assets/           # Static assets (images, fonts, etc.)
-  components/
-    common/         # Reusable UI components
-    forms/          # Form-related components
-    layout/         # Layout components
-    ui/             # Basic UI components (Button, Input, etc.)
-  features/         # Feature-based modules
-    auth/           # Authentication feature
-      components/   # Feature-specific components
-      hooks/        # Feature-specific hooks
-      types/        # Feature-specific types
-      index.ts      # Public API for the feature
-    user/           # User profile feature
-      components/
-      hooks/
-      types/
-      index.ts
-  lib/              # Third-party library configurations
-  providers/        # Context providers
-  routes/           # Route configurations
-  services/         # API services
-  store/            # State management (if using Redux/Recoil)
-  styles/           # Global styles, themes
-  types/            # Global TypeScript types
-  utils/            # Utility functions
+---
+
+## 2. Make `App.tsx` Minimal and Boring
+
+### Problem
+- App.tsx risks becoming a “god file”
+- Too many responsibilities in one place
+
+### Improvement
+Move providers, routes, and layout logic out of `App.tsx`.
+
+```tsx
+export default function App() {
+  return (
+    <Providers>
+      <AppRoutes />
+    </Providers>
+  )
+}
 ```
 
-## 2. Code Organization
+---
 
-### Feature-based Architecture
-- Group related components, hooks, and logic by feature rather than by type
-- Each feature should be self-contained with its own components, hooks, and types
-- Use index files to control what's exposed from each module
+## 3. Separate UI Components from Business Logic
 
-### Component Structure
-- Follow the Atomic Design methodology for component organization
-- Split large components into smaller, more manageable ones
-- Move complex logic into custom hooks
+### UI Components (`shared/components`)
+Rules:
+- No API calls
+- No context usage
+- Props only
+- Fully reusable
 
-## 3. Performance Optimizations
+### Feature Components (`features/*`)
+- Can use hooks, context, and API
+- Implement business rules
 
-### Code Splitting
-- Implement route-based code splitting using React.lazy and Suspense
-- Split large component libraries (e.g., import only used icons from @heroicons/react)
+This separation improves reusability, testability, and clarity.
 
-### Memoization
-- Use React.memo for expensive components
-- Implement useCallback and useMemo where appropriate
-- Consider using a state management library for global state to prevent unnecessary re-renders
+---
 
-### Bundle Optimization
-- Analyze bundle size with source-map-explorer
-- Configure code splitting for better initial load performance
-- Consider using dynamic imports for non-critical components
+## 4. Improve Context Usage
 
-## 4. Testing Strategy
+### Problems
+- Contexts can grow too large
+- Unnecessary re-renders
+- Raw contexts may be exported
 
-### Unit Testing
-- Add Jest and React Testing Library for component testing
-- Test critical business logic and custom hooks
-- Aim for good coverage of utility functions
+### Improvements
+- Never export raw context
+- Expose a custom hook (`useAuth`, `useUser`)
+- Keep context state minimal
+- Split data and actions
 
-### Integration Testing
-- Test component interactions
-- Test API integration points
+```ts
+type AuthContextValue = {
+  token: string | null
+  isAuthenticated: boolean
+  login(token: string): void
+  logout(): void
+}
+```
 
-### E2E Testing
-- Implement Cypress or Playwright for end-to-end testing
-- Test critical user flows (login, registration, profile updates)
+---
 
-## 5. Documentation
+## 5. Centralize API Logic
 
-### Component Documentation
-- Add Storybook for component documentation
-- Document component props and usage examples
+### Problem
+- `fetch` logic scattered across components and hooks
 
-### API Documentation
-- Document API endpoints and expected request/response formats
-- Consider using OpenAPI/Swagger for API documentation
+### Improvement
+Create a single API client and feature-specific API files.
 
-### Project Documentation
-- Keep README.md up to date
-- Document setup and development workflows
-- Add contribution guidelines
+```ts
+// shared/lib/apiClient.ts
+export const apiClient = {
+  get: (url: string) => fetch(url, { credentials: "include" }),
+  post: (url: string, body: unknown) =>
+    fetch(url, {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    }),
+}
+```
 
-## 6. TypeScript Enhancements
+```ts
+// features/auth/auth.api.ts
+export const login = (payload: LoginPayload) =>
+  apiClient.post("/api/login", payload)
+```
 
-### Strict Mode
-- Enable strict mode in tsconfig.json
-- Add stricter type checking rules
-- Use TypeScript's utility types effectively
+---
 
-### Type Organization
-- Group related types in dedicated type files
-- Use discriminated unions for better type safety
-- Avoid using 'any' type
+## 6. Treat Types as First-Class Citizens
 
-## 7. State Management
+### Improvements
+- Centralize types per feature
+- Avoid inline interfaces inside components
+- Avoid `any`
+- Import types explicitly
 
-### Context Optimization
-- Split AuthContext and UserContext into separate providers
-- Consider using a state management library (Zustand, Jotai) for better performance
+```ts
+import type { User } from "./user.types"
+```
 
-### Server State Management
-- Implement React Query or SWR for server state management
-- Handle loading and error states consistently
-- Implement caching strategies
+---
 
-## 8. Error Handling
+## 7. Naming, Cleanup, and Consistency
 
-### Error Boundaries
-- Add error boundaries to catch and handle React errors gracefully
-- Implement a global error boundary for the entire app
+### Improvements
+- Use consistent, descriptive names
+- Rename components to reflect responsibility
+- Delete dead or legacy files
 
-### API Error Handling
-- Standardize API error responses
-- Implement retry logic for failed requests
-- Show user-friendly error messages
+Examples:
+- `UploadProfileImage` → `ProfileImageUploader`
+- `EditableField` → `EditableText`
+- Remove `NavbarOld.tsx`
 
-## 9. Performance Monitoring
+Dead code increases cognitive load and should be removed.
 
-### Analytics
-- Add performance monitoring (e.g., Sentry, LogRocket)
-- Track runtime errors and performance metrics
+---
 
-### Bundle Analysis
-- Set up bundle size monitoring
-- Track performance budgets
+## 8. Use Index Files for Clean Imports
 
-## 10. Accessibility (a11y)
+Create `index.ts` files inside feature folders:
 
-### Semantic HTML
-- Use proper HTML5 semantic elements
-- Ensure proper heading hierarchy
+```ts
+export * from "./UserMenu"
+export * from "./UserContext"
+```
 
-### ARIA Attributes
-- Add appropriate ARIA attributes
-- Test with screen readers
+Allows clean imports:
 
-### Keyboard Navigation
-- Ensure all interactive elements are keyboard accessible
-- Implement focus management
+```ts
+import { UserMenu } from "@/features/user"
+```
 
-## Implementation Strategy
+---
 
-1. **Phase 1: Foundation**
-   - Set up new directory structure
-   - Configure tooling (testing, linting, etc.)
-   - Set up CI/CD pipeline
+## 9. Tooling & Professional Polish
 
-2. **Phase 2: Refactoring**
-   - Migrate to the new structure incrementally
-   - Start with low-risk components
-   - Update tests as you go
+Recommended additions:
+- ESLint (strict rules)
+- Prettier (consistent formatting)
+- Absolute imports (`@/`)
+- Error boundaries
+- Centralized toast/notification system
 
-3. **Phase 3: Optimization**
-   - Implement performance improvements
-   - Add monitoring
-   - Optimize bundle size
+---
 
-4. **Phase 4: Documentation**
-   - Document the new architecture
-   - Update developer documentation
-   - Create contribution guidelines
+## 10. Optional Next-Level Improvements
+
+- Introduce React Query / TanStack Query
+- Add unit and integration tests
+- Add loading & error states consistently
+- Add role-based access control if needed
+
+---
+
+## Summary
+
+After applying these improvements, the application will:
+- Be easier to scale
+- Be easier to onboard new developers
+- Have clearer ownership of logic
+- Look professional and production-ready
+
+This plan can be implemented incrementally over multiple commits.
