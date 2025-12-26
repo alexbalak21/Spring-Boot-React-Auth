@@ -122,4 +122,18 @@ public class UserController {
         }
     }
 
+    @PreAuthorize("isAuthenticated()")
+    @DeleteMapping("/profile-image")
+    public ResponseEntity<?> deleteProfileImage() {
+        try {
+            CustomUserDetails currentUser = userService.getCurrentUser();
+
+            userProfileImageService.deleteProfileImage(currentUser.getId());
+
+            return ResponseEntity.ok("Profile image deleted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Failed to delete profile image");
+        }
+    }
+
 }

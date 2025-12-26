@@ -62,7 +62,7 @@ public class UserProfileImageService {
     /**
      * Delete profile image for a user.
      */
-    public void deleteImage(Long userId) {
+    public void deleteProfileImage(Long userId) {
         repository.findByUserId(userId).ifPresent(repository::delete);
     }
 }
